@@ -6,12 +6,9 @@
 /**
  * Class ReachCli
  *
- * YII component that allows use reach text formatting for console output
+ * Helper for colorful and reach text formatting for console output
  */
-class ReachCli extends CApplicationComponent
-{
-	/** @var int number of symbols in one line */
-	public $charsWidth = 80;
+class RCli {
 
 	/** Text colours */
 	const CODE_FONT_BLACK = 30; // Black
@@ -42,6 +39,12 @@ class ReachCli extends CApplicationComponent
 	const CODE_INVERT = 7; // Invert foreground and background
 	const CODE_HIDE = 8; // Hidden text
 
+	/** @var string End of line symbol*/
+	public static $eol = PHP_EOL;
+
+	/** @var int Length of line */
+	public static $lineWidth = 80;
+
 	/**
 	 * Apply string using one or more format codes
 	 *
@@ -49,7 +52,7 @@ class ReachCli extends CApplicationComponent
 	 * @param mixed $codes Appearance codes
 	 * @return string Formatted and wrapped with control sequences string
 	 */
-	public function writeString($string, $codes)
+	public static function writeString($string, $codes)
 	{
 		if (is_array($codes)) {
 			$codeString = join(';', $codes);
@@ -69,7 +72,7 @@ class ReachCli extends CApplicationComponent
 	 * @param $code integer
 	 * @return string
 	 */
-	public function writeCode($code)
+	public static function writeCode($code)
 	{
 		return "\033[{$code}m";
 	}
@@ -81,9 +84,9 @@ class ReachCli extends CApplicationComponent
 	 * @param int $codes
 	 * @return string
 	 */
-	public function hr($char = '=', $codes = self::CODE_FONT_BLACK)
+	public static function hr($char = '=', $codes = self::CODE_FONT_BLACK)
 	{
-		return $this->writeString(str_repeat($char, (int)$this->charsWidth), $codes) . "\n";
+		return self::writeString(str_repeat($char, (int)self::$lineWidth), $codes) . self::$eol;
 	}
 
 }
