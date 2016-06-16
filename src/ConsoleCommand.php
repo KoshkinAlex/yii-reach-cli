@@ -11,6 +11,8 @@ namespace ReachCli;
  */
 abstract class ConsoleCommand extends \CConsoleCommand
 {
+	use ConsoleCommandTraits\Timer;
+
 	const CHANGES_DO_NOT = 0;
 	const CHANGES_DO_AUTOMATIC = 1;
 	const CHANGES_DO_CONFIRM = 2;
@@ -59,8 +61,10 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		// By default output is enabled if we detect that script is executed by human
 		$this->_outputEnabled = $this->isExecutedByHuman();
 
-		// We need it to measure script execution time
-		$this->_timeBegin = microtime(true);
+		// Remember time of script begin execution ConsoleCommandTraits\Timer
+		if (method_exists($this, 'startExecutionTime')) {
+			$this->startExecutionTime();
+		}
 
 		// Windows terminal does not support colors and UTF
 		if ($this->isWindowsConsole()) {
