@@ -56,7 +56,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	/** @inheritdoc */
 	public function __construct($name, $runner)
 	{
-		self::__construct($name, $runner);
+		parent::__construct($name, $runner);
 
 		// By default output is enabled if we detect that script is executed by human
 		$this->_outputEnabled = $this->isExecutedByHuman();
@@ -184,7 +184,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	/**
 	 * Действие по умолчанию - отображение справки
 	 */
-	protected function actionHelp(){
+	public function actionHelp(){
 
 		print $this->getHelp();
 	}
