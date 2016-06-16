@@ -49,14 +49,14 @@ class RCli {
 	public static $lineWidth = 80;
 
 	/**
-	 * Apply string using one or more format codes
+	 * Apply string decoration using one or more format codes
 	 *
 	 * @param string $string Text to apply formatting
 	 * @param mixed $codes Appearance codes
 	 * @return string Formatted and wrapped with control sequences string
 	 */
-	public static function writeString($string, $codes)
-	{
+	public static function msg($string, $codes) {
+
 		if (is_array($codes)) {
 			$codeString = join(static::JOIN_CODE, $codes);
 		} else {
@@ -70,14 +70,23 @@ class RCli {
 	}
 
 	/**
-	 * Write one control sequence item
+	 * The same as self::msg() but with line ending
 	 *
-	 * @param $code integer
+	 * @param $string
+	 * @param $codes
 	 * @return string
 	 */
-	public static function writeCode($code)
+	public static function line($string, $codes) {
+		return self::msg($string, $codes) . PHP_EOL;
+	}
+
+	/**
+	 * @deprecated
+	 * @see self::msg()
+	 */
+	public static function writeString($string, $codes)
 	{
-		return "\033[{$code}m";
+		return self::msg($string, $codes);
 	}
 
 	/**
@@ -89,7 +98,84 @@ class RCli {
 	 */
 	public static function hr($char = '=', $codes = self::FONT_BLACK)
 	{
-		return self::writeString(str_repeat($char, (int)self::$lineWidth), $codes) . PHP_EOL;
+		return self::line(str_repeat($char, (int)self::$lineWidth), $codes);
+	}
+
+	/**
+	 * Console output for not only scalar variables
+	 * @param mixed $var
+	 */
+	public static function outVar($var)
+	{
+		$outRec = function($var, $level) use (&$outRec) {
+			$out = '';
+			if (is_array($var)) {
+				foreach ($var as $key => $value) {
+					$out .= self::msg(str_repeat('  ', $level).sprintf("%-40s",$key)."   ", [self::FONT_WHITE, self::BRIGHT_LESS]);
+					$out .= $outRec($value, $level+1);
+				}
+			} elseif (method_exists($var, '__toString')) {
+				$out .= static::line($var, self::FONT_YELLOW);
+			} else {
+				$out .= static::line(print_r($var, true), self::FONT_YELLOW);
+			}
+
+			return $out;
+		};
+
+		return $outRec($var, 0);
+	}
+
+	/**
+	 * Generate table row
+	 *
+	 * @param array $data Table cells
+	 * @param int $defaultWidth Default cell width (in chars)
+	 * @param string|array $defaultColor Colour for the whole row (by default)
+	 * @return string
+	 *
+	 * Each cell can be defined in one of this ways:
+	 * 		$value,
+	 * 		[$value],
+	 * 		[$value, $width],
+	 * 		[$value, $width, $color],
+	 */
+	public static function tableRow($data, $defaultWidth = 10, $defaultColor = null) {
+		$output = '';
+		$num = 0;
+		foreach ($data as $col) {
+			if ($num == 0) $output .= self::msg('|',[self::FONT_WHITE, self::BRIGHT_LESS]);
+
+			$value = is_array($col) && isset($col[0])
+				? $col[0]
+				: $col;
+
+			$width = is_array($col) && isset($col[1])
+				? intval($col[1])
+				: $defaultWidth;
+
+			$color = is_array($col) && !empty($col[2])
+				? $col[2]
+				: $defaultColor;
+
+			$output .= self::msg(sprintf(" %{$width}s ",$value), $color);
+
+			$num++;
+
+			$output .= self::msg('|',[self::FONT_WHITE, self::BRIGHT_LESS]);
+		}
+		return $output . PHP_EOL;
+	}
+
+	/**
+	 * Write one control sequence item
+	 *
+	 * @param $code integer
+	 * @return string
+	 */
+	protected static function writeCode($code)
+	{
+		return "\033[{$code}m";
 	}
 
 }

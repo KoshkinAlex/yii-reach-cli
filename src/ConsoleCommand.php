@@ -33,6 +33,12 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	/** @var string Label that marks default action in list of available command actions */
 	protected $labelDefaultAction = '[default]';
 
+	/** @var string Default label for message with success status */
+	protected $labelSuccess = 'OK';
+
+	/** @var string Default label for message with fail status */
+	protected $labelFail = 'FAIL';
+
 	/** @var bool If is true script generates output to standard output */
 	private $_outputEnabled = true;
 
@@ -64,6 +70,33 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	}
 
 	/**
+	 * Disable output
+	 * @return void
+	 */
+	public function disableOutput()
+	{
+		$this->_outputEnabled = false;
+	}
+
+	/**
+	 * Enable output
+	 * @return void
+	 */
+	public function enableOutput()
+	{
+		$this->_outputEnabled = true;
+	}
+
+	/**
+	 * Check if output is enabled
+	 * @return bool
+	 */
+	public function hasOutput()
+	{
+		return (bool)$this->_outputEnabled;
+	}
+
+	/**
 	 * Определение массива с названиями типов изменений
 	 * @param null $id
 	 * @return array|string
@@ -89,16 +122,16 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	public function getHelp()
 	{
 		$class=new \ReflectionClass(get_class($this));
-		$help = RCli::hr('=', RCli::BRIGHT_LESS).' '.RCli::writeString($class->getName(), [RCli::FONT_RED, RCli::UNDERLINE]);
+		$help = RCli::hr('=', RCli::BRIGHT_LESS).' '.RCli::msg($class->getName(), [RCli::FONT_RED, RCli::UNDERLINE]);
 
 		$description = $this->description;
 		if (!$description) {
 			$description = $this->getDocText($class->getDocComment());
 		}
 		if ($description) {
-			$help .= PHP_EOL.'	'.RCli::writeString($description, RCli::FONT_YELLOW).PHP_EOL;
+			$help .= PHP_EOL.'	'.RCli::msg($description, RCli::FONT_YELLOW).PHP_EOL;
 		}
-		$help .= PHP_EOL." ".RCli::writeString("Доступные действия", RCli::UNDERLINE).":".PHP_EOL.PHP_EOL;
+		$help .= PHP_EOL." ".RCli::msg("Доступные действия", RCli::UNDERLINE).":".PHP_EOL.PHP_EOL;
 
 		foreach($class->getMethods(\ReflectionMethod::IS_PUBLIC) as $method)
 		{
@@ -107,14 +140,14 @@ abstract class ConsoleCommand extends \CConsoleCommand
 			{
 				$actionName=substr($name,6);
 				$actionName[0]=strtolower($actionName[0]);
-				$help.= "	".RCli::writeString($actionName, [RCli::FONT_RED, RCli::BRIGHT_MORE]);
+				$help.= "	".RCli::msg($actionName, [RCli::FONT_RED, RCli::BRIGHT_MORE]);
 				if ($this->defaultAction == $actionName) {
-					$help .= ' ' . RCli::writeString($this->labelDefaultAction, RCli::FONT_GREEN) . ' ';
+					$help .= ' ' . RCli::msg($this->labelDefaultAction, RCli::FONT_GREEN) . ' ';
 				}
 				$docComment = $method->getDocComment();
 				$description = $this->getDocText($docComment);
 
-				if ($description) $help.= " - ".RCli::writeString($description, RCli::FONT_YELLOW);
+				if ($description) $help.= " - ".RCli::msg($description, RCli::FONT_YELLOW);
 				$help.= PHP_EOL;
 
 				foreach ($method->getParameters() as $param) {
@@ -125,10 +158,10 @@ abstract class ConsoleCommand extends \CConsoleCommand
 					$description = '';
 
 					if (preg_match("/{$name}\s*([^\@\*\n]+)[\@\*\n]/is", $docComment, $m)) {
-						$description = ' ' . RCli::writeString($m[1], RCli::FONT_WHITE);
+						$description = ' ' . RCli::msg($m[1], RCli::FONT_WHITE);
 					}
 
-					$help .= RCli::writeString(
+					$help .= RCli::msg(
 							"		" .
 							($param->isOptional()
 								? "[--$name=$defaultValue]"
@@ -141,33 +174,32 @@ abstract class ConsoleCommand extends \CConsoleCommand
 				$help .= PHP_EOL;
 			}
 		}
-		return $help.PHP_EOL;
+		return $help . PHP_EOL;
 	}
 
 	/**
 	 * Действие по умолчанию - отображение справки
 	 */
-	public function actionHelp(){
+	protected function actionHelp(){
 
 		print $this->getHelp();
 	}
-
 
 	/**
 	 * Выдача запроса на тип изменений (автоматический, без изменений, по запросу)
 	 * @return int
 	 */
-	public function promptDoChanges(){
+	protected function promptDoChanges(){
 		$text = '';
 		$c = [];
 		$i = 0;
 		foreach (self::getDoChangesType() as $k=>$v) {
 			$i++;
-			$text .= "   ".RCli::writeString("{$i})", RCli::FONT_RED). " ".$v.PHP_EOL;
+			$text .= "   ".RCli::msg("{$i})", RCli::FONT_RED). " ".$v.PHP_EOL;
 			$c[$i] = $k;
 		}
 
-		echo RCli::writeString(PHP_EOL . "Выберите тип внесения правок в БД:" . PHP_EOL, [RCli::FONT_RED, RCli::BRIGHT_MORE]);
+		echo RCli::msg(PHP_EOL . "Выберите тип внесения правок в БД:" . PHP_EOL, [RCli::FONT_RED, RCli::BRIGHT_MORE]);
 		echo $text;
 
 		$type = $this->prompt(PHP_EOL."Введите число");
@@ -224,7 +256,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		}
 
 		if ($this->useColors) {
-			$this->out(RCli::writeString($message, $color));
+			$this->out(RCli::msg($message, $color));
 		} else {
 			$this->out($message);
 		}
@@ -240,7 +272,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 */
 	public function confirm($message, $color = null, $default = false)
 	{
-		$message = RCli::writeString($message, $color);
+		$message = RCli::msg($message, $color);
 		return parent::confirm($message, $default);
 	}
 
@@ -257,6 +289,17 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	}
 
 	/**
+	 * Console output for not only scalar variables
+	 *
+	 * @see RCli::outVar()
+	 * @param mixed $var
+	 */
+	public function outVar($var)
+	{
+		$this->out(RCli::outVar($var));
+	}
+
+	/**
 	 * Wrapper for all output generated by this class.
 	 * Output can be cached and reformatted it it's necessary
 	 *
@@ -268,6 +311,18 @@ abstract class ConsoleCommand extends \CConsoleCommand
 			if ($this->useTransliteration) echo strtr($message, $this->transliterationTable);
 			else echo $message;
 		}
+	}
+
+	/**
+	 * Output table row
+	 *
+	 * @see RCli::tableRow()
+	 * @param $data
+	 * @param int $defaultWidth
+	 * @param null $defaultColor
+	 */
+	public function table($data, $defaultWidth = 10, $defaultColor = null) {
+		$this->out(RCli::tableRow($data, $defaultWidth, $defaultColor));
 	}
 
 	/**
@@ -316,23 +371,17 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		}
 
 		$this->eol();
-		$this->out(RCli::hr('=', RCli::FONT_YELLOW));
+		$this->hr('=', RCli::FONT_YELLOW);
 
 		if ($this->_timeBegin > 0) {
-			$this->out(
-				RCli::writeString(
-					sprintf("Script execution time: %.1f sec", microtime(true) - $this->_timeBegin),
-					RCli::FONT_YELLOW
-				)
-			);
-			$this->eol();
+			$this->line(sprintf("Script execution time: %.1f sec", microtime(true) - $this->_timeBegin), RCli::FONT_YELLOW );
 		}
 
 		if ($this->_outputEnabled) {
 			foreach ($this->_counter as $key => $value) {
 				$label = empty($this->_counterLabel[$key]) ? "Number of records" : $this->_counterLabel[$key];
-				echo RCli::writeString("   " . $label . ": ", RCli::FONT_WHITE);
-				echo RCli::writeString($value, RCli::FONT_GREEN);
+				$this->msg("   " . $label . ": ", RCli::FONT_WHITE);
+				$this->msg($value, RCli::FONT_GREEN);
 				$this->eol();
 			}
 		}
@@ -349,14 +398,13 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 */
 	public function status($msg, $status, $value = false)
 	{
-		$this->out(RCli::writeString(sprintf("%'.-70s ", $msg), RCli::FONT_WHITE));
+		$labelLength = max(strlen($this->labelSuccess), strlen($this->labelFail)) + 1;
+		$this->msg(sprintf("%'.-70s ", $msg), RCli::FONT_WHITE);
 		if ($status) {
-			$this->out(RCli::writeString(sprintf("%8s", $value !== false ? $value : "OK"), RCli::FONT_GREEN));
+			$this->line(sprintf("%{$labelLength}s", $value !== false ? $value : $this->labelSuccess), RCli::FONT_GREEN);
 		} else {
-			$this->out(RCli::writeString(sprintf("%8s", $value !== false ? $value : "FAIL"), RCli::FONT_RED));
+			$this->line(sprintf("%{$labelLength}s", $value !== false ? $value : $this->labelFail), RCli::FONT_RED);
 		}
-
-		$this->eol();
 	}
 
 	/**
