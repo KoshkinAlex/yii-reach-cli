@@ -14,10 +14,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	use ConsoleCommandTraits\Timer;
 	use ConsoleCommandTraits\ErrorWarning;
 	use ConsoleCommandTraits\Statistic;
-
-	const CHANGES_DO_NOT = 0;
-	const CHANGES_DO_AUTOMATIC = 1;
-	const CHANGES_DO_CONFIRM = 2;
+	use ConsoleCommandTraits\ListSelect;
 
 	public $description = null;
 	public $defaultAction = 'help';
@@ -94,25 +91,6 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	}
 
 	/**
-	 * Определение массива с названиями типов изменений
-	 * @param null $id
-	 * @return array|string
-	 */
-	public static function getDoChangesType($id = null) {
-
-		$list = [
-			self::CHANGES_DO_NOT => 'Не вносить правки в БД',
-			self::CHANGES_DO_AUTOMATIC => 'Вносить правки в БД для всех случаев',
-			self::CHANGES_DO_CONFIRM => 'Выдавать запрос на внесение правок в БД',
-		];
-
-		if ($id !== null && !isset($list[$id])) {
-			return '';
-		}
-		return $id !== null ? (is_array($id) ? array_intersect($list, $id) : $list[$id]) : $list;
-	}
-
-	/**
 	 * Отображение всех возможных действий с описаниями
 	 * @return string
 	 */
@@ -180,29 +158,6 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	public function actionHelp(){
 
 		print $this->getHelp();
-	}
-
-	/**
-	 * Выдача запроса на тип изменений (автоматический, без изменений, по запросу)
-	 * @return int
-	 */
-	protected function promptDoChanges(){
-		$text = '';
-		$c = [];
-		$i = 0;
-		foreach (self::getDoChangesType() as $k=>$v) {
-			$i++;
-			$text .= "   ".RCli::msg("{$i})", RCli::FONT_RED). " ".$v.PHP_EOL;
-			$c[$i] = $k;
-		}
-
-		echo RCli::msg(PHP_EOL . "Выберите тип внесения правок в БД:" . PHP_EOL, [RCli::FONT_RED, RCli::BRIGHT_MORE]);
-		echo $text;
-
-		$type = $this->prompt(PHP_EOL."Введите число");
-
-		if (isset($c[$type])) return $c[$type];
-		else return self::CHANGES_DO_NOT;
 	}
 
 	/**
