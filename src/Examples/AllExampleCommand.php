@@ -18,24 +18,13 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	/**
 	 * All actions, combined to one
 	 */
-	public function actionAll() {
-
-		$this->line('Basic examples of reach console output');
+	public function actionAll()
+	{
 		$this->actionBasic();
-
-		$this->line('Ask user for question with binary answer');
 		$this->actionConfirm();
-
-		$this->line('Ask user for question with custom answer');
 		$this->actionPrompt();
-
-		$this->line('Ask user for one of predefined answers');
 		$this->actionSelect();
-
-		$this->line('Remember some command statistic and show it at the end of script execution');
 		$this->actionStatistic();
-
-		$this->line('Sample warning and error messages');
 		$this->actionWarning();
 	}
 
@@ -43,6 +32,7 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	 * Basic examples of reach console output
 	 */
 	public function actionBasic() {
+		$this->header('Sample warning and error messages');
 
 		// Simple colour messages
 		$this->msg('RED', RCli::FONT_RED);
@@ -67,6 +57,8 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	 * Ask user for question with binary answer
 	 */
 	public function actionConfirm() {
+		$this->header('Ask user for question with binary answer');
+
 		$userReply = $this->confirm("Do you want to launch rocket to Mars?", RCli::FONT_YELLOW);
 		$this->status('Martian mission starting', $userReply);
 	}
@@ -75,6 +67,8 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	 * Ask user for question with custom answer
 	 */
 	public function actionPrompt() {
+		$this->header('Ask user for question with custom answer');
+
 		$userReply = $this->prompt("Please enter new password", RCli::FONT_BLUE);
 		$this->line(sprintf('Sorry, password %s is used by user %s, choose other one', RCli::msg($userReply, RCli::FONT_RED), RCli::msg('admin', RCli::FONT_YELLOW)));
 	}
@@ -83,6 +77,7 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	 * Ask user for one of predefined answers
 	 */
 	public function actionSelect() {
+		$this->header('Ask user for one of predefined answers');
 
 		$answers = [ 'banana', 'apple', 'strawberry', 'stone',];
 
@@ -97,6 +92,8 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	 * Remember some command statistic and show it at the end of script execution
 	 */
 	public function actionStatistic() {
+		$this->header('Remember some command statistic and show it at the end of script execution');
+
 		for ($i = 1; $i <= rand(50, 100); $i+= rand(1,3)) {
 			$this->inc('Total numbers');
 
@@ -116,6 +113,8 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	 * Sample warning and error messages
 	 */
 	public function actionWarning() {
+		$this->header('Sample warning and error messages');
+
 		$this->warning('Please try one more time');
 		$this->error('Thank you Mario, but your princess is in another castle!');
 	}

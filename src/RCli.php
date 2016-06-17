@@ -57,11 +57,9 @@ class RCli {
 	 */
 	public static function msg($string, $codes) {
 
-		if (is_array($codes)) {
-			$codeString = join(static::JOIN_CODE, $codes);
-		} else {
-			$codeString = $codes;
-		}
+		$codeString = is_array($codes)
+			? join(static::JOIN_CODE, $codes)
+			: $codes;
 
 		return
 			self::writeCode($codeString)
@@ -83,6 +81,9 @@ class RCli {
 	/**
 	 * @deprecated
 	 * @see self::msg()
+	 * @param $string
+	 * @param $codes
+	 * @return string
 	 */
 	public static function writeString($string, $codes)
 	{
@@ -92,13 +93,30 @@ class RCli {
 	/**
 	 * Horizontal line with line ending
 	 *
-	 * @param string $char
-	 * @param int $codes
+	 * @param string $char Symbol to construct horizontal line
+	 * @param string|array|integer|null $codes Message decorate code(s)
 	 * @return string
 	 */
 	public static function hr($char = '=', $codes = self::FONT_BLACK)
 	{
 		return self::line(str_repeat($char, (int)self::$lineWidth), $codes);
+	}
+
+	/**
+	 * Header for some text, separated with horizontal lines
+	 *
+	 * @param $message
+	 * @param string|array|integer|null $codes Message decorate code(s)
+	 * @param string|array|integer|null $lineCodes Horizontal lines decorate code(s)
+	 * @return string
+	 */
+	public static function header($message, $codes, $lineCodes = null)
+	{
+		return
+			PHP_EOL
+			. static::hr('=', $lineCodes)
+			. static::line($message, $codes)
+			. static::hr('-', $lineCodes);
 	}
 
 	/**
@@ -131,7 +149,7 @@ class RCli {
 	 *
 	 * @param array $data Table cells
 	 * @param int $defaultWidth Default cell width (in chars)
-	 * @param string|array $defaultColor Colour for the whole row (by default)
+	 * @param string|array|integer|null $defaultColor Colour for the whole row (by default)
 	 * @return string
 	 *
 	 * Each cell can be defined in one of this ways:

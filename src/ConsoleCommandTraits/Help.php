@@ -16,17 +16,14 @@ use ReachCli\RCli;
  */
 trait Help
 {
-	/** @var string Set default command action to 'actionHelp' */
-	public $defaultAction = 'help';
-
 	/** @var string Font color for help block header */
-	protected $colorHelpHeader = RCli::FONT_RED;
+	protected $colorHelpHeader = RCli::FONT_BLUE;
 
 	/** @var string Font color for command name (which help is generated) */
-	protected $colorHelpHeaderClassName = [RCli::FONT_RED, RCli::UNDERLINE];
+	protected $colorHelpHeaderClassName = [RCli::FONT_BLUE, RCli::BRIGHT_MORE];
 
 	/** @var string Font color for command description */
-	protected $colorHelpDescription = RCli::FONT_YELLOW;
+	protected $colorHelpDescription = [RCli::FONT_YELLOW, RCli::BRIGHT_LESS];
 
 	/** @var string Header label for list of command available actions */
 	protected $labelHelpAvailableActions = "\tAvailable actions:";
@@ -56,8 +53,14 @@ trait Help
 	 * Default action - show command help
 	 * @return void
 	 */
-	public function actionHelp(){
-		$this->out($this->getHelp());
+	public function actionHelp() {
+
+		$help = $this->getHelp();
+		if (method_exists($this, 'out')) {
+			$this->out($help);
+		} else {
+			echo $help;
+		}
 	}
 
 	/**
@@ -75,7 +78,7 @@ trait Help
 		$description = $this->getDocText($class->getDocComment());
 
 		if ($description) {
-			$help .= PHP_EOL . '	' . RCli::msg($description, $this->colorHelpDescription) . PHP_EOL;
+			$help .= PHP_EOL . ' ' . RCli::msg($description, $this->colorHelpDescription) . PHP_EOL;
 		}
 		$help .= PHP_EOL . RCli::msg($this->labelHelpAvailableActions, $this->colorHelpAvailableActions) . PHP_EOL . PHP_EOL;
 
@@ -101,12 +104,14 @@ trait Help
 					$name = $param->getName();
 
 					// Action parameter value
-					$help .= RCli::msg("\t\t" . ($param->isOptional() ? "[--$name=$defaultValue]" : "--$name=value"), $this->colorHelpActionParameter );
+					$help .= RCli::msg("\t\t" . ($param->isOptional() ? "[--$name=$defaultValue]" : "--$name=value") , $this->colorHelpActionParameter );
 
 					// Action parameter description
 					if (preg_match("/{$name}\s*([^\@\*\n]+)[\@\*\n]/is", $docComment, $m)) {
 						$help .= "\t" . RCli::msg($m[1], $this->colorHelpActionParameterDescription);
 					}
+
+					$help .= PHP_EOL;
 				}
 				$help .= PHP_EOL;
 			}

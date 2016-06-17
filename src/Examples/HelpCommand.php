@@ -27,7 +27,6 @@ class HelpCommand extends \CConsoleCommand
 	}
 
 	/**
-	/**
 	 * Print message
 	 * @param string $message Message to print
 	 */

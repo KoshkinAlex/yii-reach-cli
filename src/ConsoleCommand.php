@@ -17,7 +17,8 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	use ConsoleCommandTraits\ListSelect;
 	use ConsoleCommandTraits\Help;
 
-	public $description = null;
+	/** @var string Set default command action to 'actionHelp' */
+	public $defaultAction = 'help';
 
 	/** @var bool If is terminal supports text color */
 	public $useColors = true;
@@ -36,6 +37,12 @@ abstract class ConsoleCommand extends \CConsoleCommand
 
 	/** @var string Default label for message with fail status */
 	protected $labelFail = 'FAIL';
+
+	/** @var string|array|integer|null Default colour for headers */
+	protected $colourDefaultHeader = RCli::FONT_BLUE;
+
+	/** @var string|array|integer|null Default colour for header lines */
+	protected $colourDefaultHeaderLines = RCli::FONT_BLUE;
 
 	/** @var bool If is true script generates output to standard output */
 	private $_outputEnabled = true;
@@ -116,18 +123,10 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 * Print message to user
 	 *
 	 * @param $message
-	 * @param null $color
+	 * @param string|array|integer|null $color
 	 */
 	public function msg($message, $color = null)
 	{
-		if ($color && !empty($colorAlias[$color])) {
-			$color = $colorAlias[$color];
-		}
-
-		if (!$color) {
-			$color = RCli::CLEAR;
-		}
-
 		if ($this->useColors) {
 			$this->out(RCli::msg($message, $color));
 		} else {
@@ -139,7 +138,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 * Asks user to confirm by typing y or n.
 	 *
 	 * @param string $message
-	 * @param null $color
+	 * @param string|array|integer|null $color Message decorate code(s)
 	 * @param bool $default
 	 * @return bool
 	 */
@@ -150,10 +149,29 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	}
 
 	/**
+	 * Reads user input
+	 * Pay attention that \CConsoleCommand::prompt() uses readline extension if it's installed. In this case reach output is not available.
+	 *
+	 * @see \CConsoleCommand::prompt()
+	 * @param string $message
+	 * @param string|array|integer|null $color Message decorate code(s)
+	 * @param null $default
+	 * @return mixed
+	 */
+	public function prompt($message, $color = null, $default = null)
+	{
+		$message = extension_loaded('readline')
+			? $message
+			: RCli::msg($message, $color);
+
+		return parent::prompt($message, $default);
+	}
+
+	/**
 	 * Does the same as @see msg(), but adds end of line after string output
 	 *
 	 * @param string $message
-	 * @param null $color
+	 * @param string|array|integer|null $color Message decorate code(s)
 	 */
 	public function line($message, $color = null)
 	{
@@ -192,7 +210,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 * @see RCli::tableRow()
 	 * @param $data
 	 * @param int $defaultWidth
-	 * @param null $defaultColor
+	 * @param string|array|integer|null $defaultColor
 	 */
 	public function table($data, $defaultWidth = 10, $defaultColor = null) {
 		$this->out(RCli::tableRow($data, $defaultWidth, $defaultColor));
@@ -202,11 +220,32 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 * Output horizontal line with line ending
 	 *
 	 * @param string $char
-	 * @param null $color
+	 * @param string|array|integer|null $color Message decorate code(s)
 	 * @return void
 	 */
 	public function hr($char = '=', $color = null) {
 		$this->out(RCli::hr($char, $color));
+	}
+
+	/**
+	 * Header for some text, separated with horizontal lines
+	 *
+	 * @param $message
+	 * @param string|array|integer|null $codes Message decorate code(s)
+	 * @param string|array|integer|null $lineCodes Horizontal lines decorate code(s)
+	 * @return string
+	 */
+	public function header($message, $codes = null, $lineCodes = null) {
+
+		if ($codes === null) {
+			$codes = $this->colourDefaultHeader;
+		}
+
+		if ($lineCodes === null) {
+			$codes = $this->colourDefaultHeaderLines;
+		}
+
+		$this->out(RCli::header($message, $codes, $lineCodes));
 	}
 
 	/**
