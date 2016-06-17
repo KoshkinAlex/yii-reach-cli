@@ -11,12 +11,7 @@ namespace ReachCli;
  */
 abstract class ConsoleCommand extends \CConsoleCommand
 {
-	use ConsoleCommandTraits\Timer;
-	use ConsoleCommandTraits\ErrorWarning;
-	use ConsoleCommandTraits\Statistic;
-	use ConsoleCommandTraits\ListSelect;
-	use ConsoleCommandTraits\Help;
-	use ConsoleCommandTraits\TerminalWidth;
+	use ConsoleCommandTraits\AllTogether;
 
 	/** @var string Set default command action to 'actionHelp' */
 	public $defaultAction = 'help';
@@ -57,9 +52,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		$this->_outputEnabled = TerminalInfo::isExecutedByHuman();
 
 		// Remember time of script begin execution ConsoleCommandTraits\Timer
-		if (method_exists($this, 'startExecutionTime')) {
-			$this->startExecutionTime();
-		}
+		$this->startExecutionTime();
 
 		// Windows terminal does not support colors and UTF
 		if (TerminalInfo::isWindowsConsole()) {
@@ -227,12 +220,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 */
 	public function out($message)	{
 		if ($this->_outputEnabled) {
-
-			if (method_exists($this, 'transliterate')) {
-				$message = $this->transliterate($message);
-			}
-
-			echo $message;
+			echo $this->transliterate($message);
 		}
 	}
 
