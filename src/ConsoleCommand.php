@@ -13,6 +13,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 {
 	use ConsoleCommandTraits\Timer;
 	use ConsoleCommandTraits\ErrorWarning;
+	use ConsoleCommandTraits\Statistic;
 
 	const CHANGES_DO_NOT = 0;
 	const CHANGES_DO_AUTOMATIC = 1;
@@ -44,15 +45,6 @@ abstract class ConsoleCommand extends \CConsoleCommand
 
 	/** @var bool If is true script generates output to standard output */
 	private $_outputEnabled = true;
-
-	/** @var int Script begin execution timestamp. Used for statistic. */
-	private $_timeBegin = 0;
-
-	/** @var array Mapping of counter keys to human-readable indicator labels */
-	private $_counterLabel = [];
-
-	/** @var array Values of counter keys */
-	private $_counter = [];
 
 	/** @inheritdoc */
 	public function __construct($name, $runner)
@@ -339,59 +331,6 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 */
 	public function hr($char = '=', $color = null) {
 		$this->out(RCli::hr($char, $color));
-	}
-
-	/**
-	 * Increment value of parameter that is interesting for us in final statistic
-	 *
-	 * @param string|bool $key Human friendly label of parameter (must be exactly the same in all calls)
-	 * @param integer $count Increment step
-	 * @return integer After increment parameter value
-	 */
-	public function inc($key = false, $count = 1)
-	{
-		if (!empty($key) && is_string($key)) {
-			$realKey = md5($key);
-			$this->_counterLabel[$realKey] = $key;
-			$key = $realKey;
-		}
-
-		if (empty($this->_counter[$key])) {
-			$this->_counter[$key] = 0;
-		}
-		$this->_counter[$key] += $count;
-
-		return $this->_counter[$key];
-	}
-
-	/**
-	 * Print command statistic
-	 *  - All parameters that we collect in @see inc()
-	 *  - Script execution time
-	 */
-	public function printStat()
-	{
-		if (count($this->_counter) == 0) {
-			return;
-		}
-
-		$this->eol();
-		$this->hr('=', RCli::FONT_YELLOW);
-
-		if ($this->_timeBegin > 0) {
-			$this->line(sprintf("Script execution time: %.1f sec", microtime(true) - $this->_timeBegin), RCli::FONT_YELLOW );
-		}
-
-		if ($this->_outputEnabled) {
-			foreach ($this->_counter as $key => $value) {
-				$label = empty($this->_counterLabel[$key]) ? "Number of records" : $this->_counterLabel[$key];
-				$this->msg("   " . $label . ": ", RCli::FONT_WHITE);
-				$this->msg($value, RCli::FONT_GREEN);
-				$this->eol();
-			}
-		}
-
-		$this->eol(2);
 	}
 
 	/**
