@@ -43,4 +43,26 @@ class TerminalInfo
 			isset($_SERVER['PATHEXT'])
 			|| isset($_SERVER['windir']);
 	}
+
+	/**
+	 * Get terminal size
+	 * @return array Two element array with number of columns and number of rows
+	 */
+	public static function getSize() {
+		$columns = null;
+		$rows = null;
+
+		if (($fp = popen("resize", "r")) !== false) {
+			$b = stream_get_contents($fp);
+			if (preg_match("/COLUMNS=([0-9]+)/", $b, $matches)) {
+				$columns = $matches[1];
+			}
+			if (preg_match("/LINES=([0-9]+)/", $b, $matches)) {
+				$rows = $matches[1];
+			}
+			pclose($fp);
+		}
+
+		return [$columns, $rows];
+	}
 }

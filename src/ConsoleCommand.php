@@ -16,6 +16,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	use ConsoleCommandTraits\Statistic;
 	use ConsoleCommandTraits\ListSelect;
 	use ConsoleCommandTraits\Help;
+	use ConsoleCommandTraits\TerminalWidth;
 
 	/** @var string Set default command action to 'actionHelp' */
 	public $defaultAction = 'help';
@@ -65,6 +66,8 @@ abstract class ConsoleCommand extends \CConsoleCommand
 			$this->useColors = false;
 			$this->disableReachOutput();
 		}
+
+		RCli::$lineWidth = $this->getTerminalWidth();
 	}
 
 	/**
@@ -286,12 +289,14 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 */
 	public function status($msg, $status, $value = false)
 	{
-		$labelLength = max(strlen($this->labelSuccess), strlen($this->labelFail)) + 1;
-		$this->msg(sprintf("%'.-70s ", $msg), RCli::FONT_WHITE);
+		$statusLength = max(strlen($this->labelSuccess), strlen($this->labelFail)) + 1;
+		$labelLength = $this->getTerminalWidth() - $statusLength - 3;
+
+		$this->msg(sprintf(" %'.-{$labelLength}s ", $msg.' '), RCli::FONT_WHITE);
 		if ($status) {
-			$this->line(sprintf("%{$labelLength}s", $value !== false ? $value : $this->labelSuccess), RCli::FONT_GREEN);
+			$this->line(sprintf("%{$statusLength}s", $value !== false ? $value : $this->labelSuccess), RCli::FONT_GREEN);
 		} else {
-			$this->line(sprintf("%{$labelLength}s", $value !== false ? $value : $this->labelFail), RCli::FONT_RED);
+			$this->line(sprintf("%{$statusLength}s", $value !== false ? $value : $this->labelFail), RCli::FONT_RED);
 		}
 	}
 
