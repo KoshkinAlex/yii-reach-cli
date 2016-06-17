@@ -31,9 +31,6 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	/** @var bool|string Convert output to this encoding  */
 	public $encodeOutput = false;
 
-	/** @var string Label that marks default action in list of available command actions */
-	protected $labelDefaultAction = '[default]';
-
 	/** @var string Default label for message with success status */
 	protected $labelSuccess = 'OK';
 
@@ -49,7 +46,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		parent::__construct($name, $runner);
 
 		// By default output is enabled if we detect that script is executed by human
-		$this->_outputEnabled = $this->isExecutedByHuman();
+		$this->_outputEnabled = TerminalInfo::isExecutedByHuman();
 
 		// Remember time of script begin execution ConsoleCommandTraits\Timer
 		if (method_exists($this, 'startExecutionTime')) {
@@ -57,7 +54,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		}
 
 		// Windows terminal does not support colors and UTF
-		if ($this->isWindowsConsole()) {
+		if (TerminalInfo::isWindowsConsole()) {
 			$this->useColors = false;
 			$this->useTransliteration = true;
 		}
@@ -83,6 +80,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 
 	/**
 	 * Check if output is enabled
+	 *
 	 * @return bool
 	 */
 	public function hasOutput()
@@ -91,34 +89,27 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	}
 
 	/**
-	 * Heuristic check that script is executed by human. Terminal sessions variables are serving as indicators.
+	 * Heuristic check that script is executed by human. Terminal sessions variables are serving as indicators
+	 * @deprecated
 	 *
+	 * @see TerminalInfo::isExecutedByHuman()
 	 * @return bool
 	 */
 	public function isExecutedByHuman()
 	{
-		return
-
-			//Linux
-			isset($_SERVER['SSH_CLIENT'])
-			|| isset($_SERVER['TERM'])
-			|| isset($_SERVER['SSH_TTY'])
-			|| isset($_SERVER['SSH_CONNECTION'])
-
-			// Windows
-			|| isset($_SERVER['HOMEPATH'])
-			||  isset($_SERVER['USERNAME']);
+		return TerminalInfo::isExecutedByHuman();
 	}
 
 	/**
 	 * Detect run on windows console
+	 *
+	 * @deprecated
+	 * @see TerminalInfo::isExecutedByHuman()
 	 * @return bool
 	 */
 	public function isWindowsConsole()
 	{
-		return
-			isset($_SERVER['PATHEXT'])
-			|| isset($_SERVER['windir']);
+		return TerminalInfo::isWindowsConsole();
 	}
 
 	/**
