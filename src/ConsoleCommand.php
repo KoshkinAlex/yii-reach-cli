@@ -20,7 +20,10 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	/** @var string Set default command action to 'actionHelp' */
 	public $defaultAction = 'help';
 
-	/** @var bool If is terminal supports text color */
+	/**
+	 * @deprecated
+	 * @var bool If is terminal supports text color
+	 */
 	public $useColors = true;
 
 	/** @var bool|string Convert output to this encoding  */
@@ -41,6 +44,9 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	/** @var bool If is true script generates output to standard output */
 	private $_outputEnabled = true;
 
+	/** @var bool If is true reach output (colours and other formatting) is enabled */
+	private $_reachOutputEnabled = true;
+
 	/** @inheritdoc */
 	public function __construct($name, $runner)
 	{
@@ -57,6 +63,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		// Windows terminal does not support colors and UTF
 		if (TerminalInfo::isWindowsConsole()) {
 			$this->useColors = false;
+			$this->disableReachOutput();
 		}
 	}
 
@@ -86,6 +93,34 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	public function hasOutput()
 	{
 		return (bool)$this->_outputEnabled;
+	}
+
+	/**
+	 * Disable reach output
+	 * @return void
+	 */
+	public function disableReachOutput()
+	{
+		RCli::$useColors = $this->_reachOutputEnabled = false;
+	}
+
+	/**
+	 * Enable reach output
+	 * @return void
+	 */
+	public function enableReachOutput()
+	{
+		RCli::$useColors = $this->_reachOutputEnabled = true;
+	}
+
+	/**
+	 * Check if reach output is enabled
+	 *
+	 * @return bool
+	 */
+	public function reachOutputEnabled()
+	{
+		return (bool)$this->_reachOutputEnabled;
 	}
 
 	/**
@@ -120,11 +155,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 */
 	public function msg($message, $color = null)
 	{
-		if ($this->useColors) {
-			$this->out(RCli::msg($message, $color));
-		} else {
-			$this->out($message);
-		}
+		$this->out(RCli::msg($message, $color));
 	}
 
 	/**
@@ -138,6 +169,7 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	public function confirm($message, $color = null, $default = false)
 	{
 		$message = RCli::msg($message, $color);
+
 		return parent::confirm($message, $default);
 	}
 

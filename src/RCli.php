@@ -48,6 +48,9 @@ class RCli {
 	/** @var int Length of line */
 	public static $lineWidth = 80;
 
+	/** @var bool Enable colors (and other formatting) in output */
+	public static $useColors = true;
+
 	/**
 	 * Apply string decoration using one or more format codes
 	 *
@@ -56,6 +59,8 @@ class RCli {
 	 * @return string Formatted and wrapped with control sequences string
 	 */
 	public static function msg($string, $codes) {
+
+		if (!self::$useColors) return $string;
 
 		$codeString = is_array($codes)
 			? join(static::JOIN_CODE, $codes)
