@@ -1,0 +1,41 @@
+## [0.2.1] - 2016-06-17
+
+### Changed
+- Usage examples in README.md
+
+### Added
+- This change log
+
+## [0.2.0] - 2016-06-17
+
+### Changed
+- All independent functionality moved from ConsoleCommand to traits
+- Terminal detection moved to separate TerminalInfo class
+
+### Added
+- Composer package
+- Usage examples
+- Widget that allows to select one answer from predefined answers list
+- Widget for console header
+- Widget for console tables
+- Manipulation with reach console output through ConsoleCommand->disableReachOutput() and ConsoleCommand->enableReachOutput() methods
+
+### Deprecated
+- Enabling and disabling of reach console output, switching ConsoleCommand->useColors flag
+- Usage of RCli::writeString()
+
+### Fixed
+- Switching reach output status bug
+
+### Removed
+- References to Yii console component
+
+## [0.1.0] - 2015-04-03
+
+### Added
+- ConsoleCommand as a base class for all console applications
+- Reach text formatting for console messages
+
+## [0.0.0] - 2013-07-02
+### Added
+- Initial commit with basic functionality
