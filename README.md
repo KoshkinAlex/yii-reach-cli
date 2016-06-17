@@ -13,14 +13,21 @@ Requirements
 Usage
 ------------
 
-Use \ReachCli\ConsoleCommand as a base class for all console commands to have all provided functionality at time.
-Use traits from \ReachCli\ConsoleCommandTraits\* to add only selected abilities to your console application.
+The simplest and fastest way for receive all functionality is to extend console commands in your applications
+from `\ReachCli\ConsoleCommand` base class. This class contains everything from this package.
+
+Most of provided functionality is divided to separate and independent traits that are located under
+`./src/ReachCli/ConsoleCommandTraits` directory and `\ReachCli\ConsoleCommandTraits` namespace. You can choose and use
+any of them in any combination.
+
+If you need all traits, but you don't want to extend from `\ReachCli\ConsoleCommand` base class, you can find all
+traits combined into one `\ReachCli\ConsoleCommandTraits\AllTogether` for easier include to projects.
 
 Examples
 ------------
 
-In all examples **RCli** means **\ReachCli\RCli** class, and **$this** means
-instance of object that extends **\ReachCli\ConsoleCommand** class.
+In all examples `RCli` means `\ReachCli\RCli` class, and `$this` means
+instance of object that extends `\ReachCli\ConsoleCommand` class.
 
 ## Output messages
 
@@ -66,8 +73,8 @@ instance of object that extends **\ReachCli\ConsoleCommand** class.
 ```
 
 ## Help for console command that is generated using PHPDoc annotations
-Use trait **ReachCli\ConsoleCommandTraits\Help** to use this functionality separately.
-See **ReachCli\Examples\HelpCommand** for example.
+Use trait `ReachCli\ConsoleCommandTraits\Help` to use this functionality separately.
+See `ReachCli\Examples\HelpCommand` for example.
 
 ```php
     // Include trait
@@ -99,7 +106,7 @@ Receive command, actions and parameters description, generated from command clas
 ```
 
 ## Errors and warnings
-Use trait **ReachCli\ConsoleCommandTraits\ErrorWarning** to use this functionality separately.
+Use trait `ReachCli\ConsoleCommandTraits\ErrorWarning` to use this functionality separately.
 
 ```php
     $this->warning('Please try one more time');
@@ -107,7 +114,7 @@ Use trait **ReachCli\ConsoleCommandTraits\ErrorWarning** to use this functionali
 ```
 
 ## Count different events and prints statistic for this events
-Use trait **ReachCli\ConsoleCommandTraits\Statistic** to use this functionality separately.
+Use trait `ReachCli\ConsoleCommandTraits\Statistic` to use this functionality separately.
 
 ```php
     // Remember "Event 1"
@@ -120,8 +127,8 @@ Use trait **ReachCli\ConsoleCommandTraits\Statistic** to use this functionality 
 ```
 
 ## Command execution timers
-Use trait **ReachCli\ConsoleCommandTraits\Timer** to use this functionality separately.
-See **ReachCli\Examples\TimerCommand** for example.
+Use trait `ReachCli\ConsoleCommandTraits\Timer` to use this functionality separately.
+See `ReachCli\Examples\TimerCommand` for example.
 
 ```php
     $this->beginTimer(); // Start timer
