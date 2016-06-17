@@ -15,9 +15,9 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	use ConsoleCommandTraits\ErrorWarning;
 	use ConsoleCommandTraits\Statistic;
 	use ConsoleCommandTraits\ListSelect;
+	use ConsoleCommandTraits\Help;
 
 	public $description = null;
-	public $defaultAction = 'help';
 
 	/** @var bool If is terminal supports text color */
 	public $useColors = true;
@@ -88,76 +88,6 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	public function hasOutput()
 	{
 		return (bool)$this->_outputEnabled;
-	}
-
-	/**
-	 * Отображение всех возможных действий с описаниями
-	 * @return string
-	 */
-	public function getHelp()
-	{
-		$class=new \ReflectionClass(get_class($this));
-		$help = RCli::hr('=', RCli::BRIGHT_LESS).' '.RCli::msg($class->getName(), [RCli::FONT_RED, RCli::UNDERLINE]);
-
-		$description = $this->description;
-		if (!$description) {
-			$description = $this->getDocText($class->getDocComment());
-		}
-		if ($description) {
-			$help .= PHP_EOL.'	'.RCli::msg($description, RCli::FONT_YELLOW).PHP_EOL;
-		}
-		$help .= PHP_EOL." ".RCli::msg("Доступные действия", RCli::UNDERLINE).":".PHP_EOL.PHP_EOL;
-
-		foreach($class->getMethods(\ReflectionMethod::IS_PUBLIC) as $method)
-		{
-			$name=$method->getName();
-			if(!strncasecmp($name,'action',6) && strlen($name)>6)
-			{
-				$actionName=substr($name,6);
-				$actionName[0]=strtolower($actionName[0]);
-				$help.= "	".RCli::msg($actionName, [RCli::FONT_RED, RCli::BRIGHT_MORE]);
-				if ($this->defaultAction == $actionName) {
-					$help .= ' ' . RCli::msg($this->labelDefaultAction, RCli::FONT_GREEN) . ' ';
-				}
-				$docComment = $method->getDocComment();
-				$description = $this->getDocText($docComment);
-
-				if ($description) $help.= " - ".RCli::msg($description, RCli::FONT_YELLOW);
-				$help.= PHP_EOL;
-
-				foreach ($method->getParameters() as $param) {
-
-					$defaultValue = $param->isDefaultValueAvailable() ? print_r($param->getDefaultValue(),1) : null;
-					$name = $param->getName();
-
-					$description = '';
-
-					if (preg_match("/{$name}\s*([^\@\*\n]+)[\@\*\n]/is", $docComment, $m)) {
-						$description = ' ' . RCli::msg($m[1], RCli::FONT_WHITE);
-					}
-
-					$help .= RCli::msg(
-							"		" .
-							($param->isOptional()
-								? "[--$name=$defaultValue]"
-								: "--$name=value"
-							),
-							RCli::FONT_BLUE
-						) . $description . PHP_EOL;
-
-				}
-				$help .= PHP_EOL;
-			}
-		}
-		return $help . PHP_EOL;
-	}
-
-	/**
-	 * Действие по умолчанию - отображение справки
-	 */
-	public function actionHelp(){
-
-		print $this->getHelp();
 	}
 
 	/**
@@ -315,18 +245,4 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	}
 
 
-	/**
-	 * Получение описания из PHPDoc комментария
-	 * @param $doc
-	 * @return string
-	 */
-	protected function getDocText($doc) {
-		$description = '';
-		foreach (explode("\n", explode('@', $doc, 2)[0]) as $line) {
-			$line = trim($line, " \t\n\r\0\x0B/*.");
-			if ($line) $description .= $line.". ";
-		}
-
-		return $description;
-	}
 }
