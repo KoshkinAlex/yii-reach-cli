@@ -12,6 +12,7 @@ namespace ReachCli;
 abstract class ConsoleCommand extends \CConsoleCommand
 {
 	use ConsoleCommandTraits\Timer;
+	use ConsoleCommandTraits\ErrorWarning;
 
 	const CHANGES_DO_NOT = 0;
 	const CHANGES_DO_AUTOMATIC = 1;
@@ -419,16 +420,6 @@ abstract class ConsoleCommand extends \CConsoleCommand
 		$this->out(str_repeat(PHP_EOL, $repeat));
 	}
 
-	/**
-	 * Вывод сообщения об ошибке
-	 * @param string $msg
-	 */
-	public function error($msg) {
-		$this->msg("ERROR: ", RCli::FONT_RED);
-		$this->msg($msg, RCli::FONT_YELLOW);
-		$this->out(PHP_EOL);
-		\Yii::app()->end();
-	}
 
 	/**
 	 * Получение описания из PHPDoc комментария
