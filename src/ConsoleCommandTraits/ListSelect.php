@@ -34,48 +34,52 @@ trait ListSelect
 	/** @var string Font color for "default" label, that marks default answer */
 	protected $colorListSelectDefaultLabel = RCli::FONT_BLUE;
 
+	/** @var string Font color for separating line */
+	protected $colorLine = [RCli::FONT_WHITE, RCli::BRIGHT_LESS];
+
 	/**
 	 * Ask user to choose one element list
 	 *
 	 * @param array $list Array with possible values
 	 * @param string|false $msg Prompt message of false if no message should be displayed
 	 * @param mixed|null $defaultValue
+	 * @param bool $returnKey If true key of selected array element is returned, it's value is returned otherwise
 	 * @return mixed
 	 */
-	public function listSelect($list, $msg = null, $defaultValue = null)
+	public function listSelect($list, $msg = null, $defaultValue = null, $returnKey = false)
 	{
 		$i = 0;
-		$newList = [];
+		$searchTargetArray = [];
 		$selected = null;
 
 		if ($msg === null) $msg = $this->messageListSelectDefaultQuestion;
 
-		$this->hr('-');
-		foreach ($list as $value) {
+		$this->hr('-', $this->colorLine);
+		foreach ($list as $key=>$value) {
 			$i++;
 			$this->msg(sprintf("%2d) ", $i), $this->colorListSelectNumber);
 			$this->msg(sprintf("%s", $value), $this->colorListSelectValue);
 
-			if (null !== $defaultValue && $value === $defaultValue) {
+			if (null !== $defaultValue && (($value === $defaultValue && false == $returnKey) || ($key === $defaultValue && true == $returnKey))) {
 				$this->msg($this->labelListSelectDefaultAnswer,$this->colorListSelectDefaultLabel);
 			}
 
 			$this->eol();
 
-			$newList[$i] = $value;
+			$searchTargetArray[$i] = $returnKey ? $key : $value;
 		}
 
 		do {
 			if ($msg !== false) $this->line($msg, $this->colorListSelectQuestion);
 
 			$input = trim(fgets(STDIN));
-			if (false !== array_search($input, array_keys($newList))) {
+			if (false !== array_search($input, array_keys($searchTargetArray))) {
 				$selected = $input;
-			} elseif (null !== $defaultValue && false !== ($key = array_search($defaultValue, $newList))) {
+			} elseif (null !== $defaultValue && false !== ($key = array_search($defaultValue, $searchTargetArray))) {
 				$selected = $key;
 			}
 		} while (empty($selected));
 
-		return $newList[$selected];
+		return $searchTargetArray[$selected];
 	}
 }

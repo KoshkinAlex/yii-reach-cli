@@ -79,11 +79,19 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	public function actionSelect() {
 		$this->header('Ask user for one of predefined answers');
 
-		$answers = [ 'banana', 'apple', 'strawberry', 'stone',];
+		$answers = [ 'banana', 'apple', 'strawberry', 'stone'];
 
 		do {
 			$result = $this->listSelect($answers, 'Please select most tasteless thing', 'apple');
 			$correct = ($result === 'stone');
+			$this->status('You answered', $correct, $result);
+		} while (!$correct);
+
+		$keyValueAnswers = [ 'banana' => 'Yellow', 'apple' => 'Green', 'strawberry' => 'Red', 'stone' => 'Gray',];
+
+		do {
+			$result = $this->listSelect($keyValueAnswers, 'Please select apple color', 'strawberry', true);
+			$correct = ($result === 'apple');
 			$this->status('You answered', $correct, $result);
 		} while (!$correct);
 	}
