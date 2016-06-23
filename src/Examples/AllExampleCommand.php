@@ -21,6 +21,7 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 	public function actionAll()
 	{
 		$this->actionBasic();
+		$this->actionStatus();
 		$this->actionConfirm();
 		$this->actionPrompt();
 		$this->actionSelect();
@@ -46,7 +47,12 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 		$this->hr('*', RCli::FONT_YELLOW);
 		$this->line(sprintf('Many %s combined %s one line', RCli::msg('colors', RCli::FONT_RED), RCli::msg('into', RCli::FONT_GREEN)), RCli::FONT_YELLOW);
 		$this->hr('=', [RCli::FONT_WHITE, RCli::BRIGHT_LESS]);
+	}
 
+	/**
+	 * Status of some action
+	 */
+	public function actionStatus() {
 		// Status
 		$this->status('Good news', true);
 		$this->status('Bad news', false);
@@ -125,5 +131,15 @@ class AllExampleCommand extends \ReachCli\ConsoleCommand
 
 		$this->warning('Please try one more time');
 		$this->error('Thank you Mario, but your princess is in another castle!');
+	}
+
+	/**
+	 * Test status helper with long labels
+	 */
+	public function actionTestLongStatus() {
+		$this->status('', true, '');
+
+		$this->status('Status with some long value', true, 'Some lo-o-o-o-o-o-o-o-o-o-o-ong value');
+		$this->status('Status with some lo-'. str_repeat('o-', 300). 'ong value', true, 'Some lo-'. str_repeat('o-', 100). 'ong label');
 	}
 }

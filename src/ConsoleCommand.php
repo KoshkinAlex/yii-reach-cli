@@ -277,15 +277,19 @@ abstract class ConsoleCommand extends \CConsoleCommand
 	 */
 	public function status($msg, $status, $value = false)
 	{
-		$statusLength = max(strlen($this->labelSuccess), strlen($this->labelFail)) + 1;
-		$labelLength = $this->getTerminalWidth() - $statusLength - 3;
-
-		$this->msg(sprintf(" %'.-{$labelLength}s ", $msg.' '), RCli::FONT_WHITE);
-		if ($status) {
-			$this->line(sprintf("%{$statusLength}s", $value !== false ? $value : $this->labelSuccess), RCli::FONT_GREEN);
-		} else {
-			$this->line(sprintf("%{$statusLength}s", $value !== false ? $value : $this->labelFail), RCli::FONT_RED);
+		$label = !empty($value) !== false ? $value : ($status ? $this->labelSuccess : $this->labelFail);
+		$terminalWidth = $this->getTerminalWidth();
+		if (strlen($label) > $terminalWidth/2 ) {
+			$label = mb_substr($msg, 0, ceil($terminalWidth/2));
 		}
+		$statusLength = strlen($label);
+		$labelMaxLength = $this->getTerminalWidth() - $statusLength - 7;
+
+		if (strlen($msg) > $labelMaxLength) $msg = mb_substr($msg, 0, $labelMaxLength);
+
+		$this->msg(' '.$msg.' ', RCli::FONT_WHITE);
+		$this->msg(str_repeat('.', $terminalWidth - (strlen($msg) + $statusLength + 4)), [RCli::FONT_WHITE, RCli::BRIGHT_LESS]);
+		$this->line(' '.$label, $status ? RCli::FONT_GREEN : RCli::FONT_RED);
 	}
 
 	/**
