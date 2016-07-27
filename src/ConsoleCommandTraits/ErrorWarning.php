@@ -89,4 +89,11 @@ trait ErrorWarning
 		}
 	}
 
+	/**
+	 * Get list of warnings
+	 * @return array
+	 */
+	public function getWarnings() {
+		return $this->_warnings;
+	}
 }
